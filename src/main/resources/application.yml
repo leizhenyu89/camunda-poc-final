@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/camunda_poc?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+      show-sql: true
+  main:
+    allow-bean-definition-overriding: true
+
+camunda:
+  bpm:
+    database:
+      type: mysql
+      schema-update: true
+    metrics:
+      enabled: false
+    generic-properties:
+      properties:
+        historyTimeToLive: P30D
+    admin-user:
+      id: admin
+      password: admin
+      firstName: Admin
+
+logging:
+  level:
+    root: info
+    org.camunda: info
+
+
