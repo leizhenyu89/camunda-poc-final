@@ -58,6 +58,15 @@ curl "http://localhost:8080/api/leave/processes/completed?processDefinitionKey=P
 curl "http://localhost:8080/api/leave/processes/{processInstanceId}/tasks/completed"
 ```
 
+## 前端使用
+```bash
+cd frontend
+npm install
+npm run dev
+```
+访问 `http://localhost:5173` 使用前端界面。
+
 ## 说明
 - BPMN 位于 `src/main/resources/processes/leave-process.bpmn`，应用启动自动部署。
-- 服务任务“人事归档”实现类：`com.example.poc.delegate.ArchiveDelegate`。
+- 服务任务"人事归档"实现类：`com.example.poc.delegate.ArchiveDelegate`。
+- 前端已配置 CORS，支持本地开发。

@@ -16,6 +16,7 @@ spring:
     allow-bean-definition-overriding: true
 
 camunda:
+  history-level: full
   bpm:
     database:
       type: mysql
@@ -34,5 +35,3 @@ logging:
   level:
     root: info
     org.camunda: info
-
-

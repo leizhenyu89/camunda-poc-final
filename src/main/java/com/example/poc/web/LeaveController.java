@@ -129,6 +129,7 @@ public class LeaveController {
             m.put("assignee", t.getAssignee());
             // 添加流程实例ID
             m.put("processInstanceId", t.getProcessInstanceId());
+            m.put("processDefinitionId", t.getProcessDefinitionId());
             return m;
         }).toList();
         // 返回HTTP 200状态码和任务数据
