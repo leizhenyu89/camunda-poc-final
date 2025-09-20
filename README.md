@@ -14,7 +14,7 @@ mvn spring-boot:run -DskipTests
 Web Apps: `http://localhost:8080` 登录 `admin/admin`。
 
 ## API 示例
-- 启动流程
+- 启动流程（申请并自动完成第一个节点）
 ```bash
 curl -X POST http://localhost:8080/api/leave/start \
   -H "Content-Type: application/json" \
@@ -23,7 +23,7 @@ curl -X POST http://localhost:8080/api/leave/start \
         "variables": {"applicant": "zhangsan", "manager": "lisi"}
       }'
 ```
-- 填写请假单（申请并自动完成第一个节点）
+- 填写请假单
 ```bash
 curl -X POST http://localhost:8080/api/leave/apply \
   -H "Content-Type: application/json" \

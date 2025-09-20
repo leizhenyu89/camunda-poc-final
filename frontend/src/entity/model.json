@@ -1,0 +1,25 @@
+[
+    {
+        "@class": "org.camunda.bpm.engine.rest.dto.repository.ProcessDefinitionStatisticsResultDto",
+        "id": "Process_034v92j:1:88b7b237-9569-11f0-a385-107c61bd2a1b",
+        "instances": 3,
+        "failedJobs": 0,
+        "incidents": [],
+        "definition": {
+            "id": "Process_034v92j:1:88b7b237-9569-11f0-a385-107c61bd2a1b",
+            "key": "Process_034v92j",
+            "category": "http://bpmn.io/schema/bpmn",
+            "description": null,
+            "name": "简洁请假流程",
+            "version": 1,
+            "resource": "C:\\Users\\xchwa\\Desktop\\camunda-poc-final\\target\\classes\\processes\\leave-process.bpmn",
+            "deploymentId": "889954c5-9569-11f0-a385-107c61bd2a1b",
+            "diagram": null,
+            "suspended": false,
+            "tenantId": null,
+            "versionTag": null,
+            "historyTimeToLive": null,
+            "startableInTasklist": false
+        }
+    }
+]

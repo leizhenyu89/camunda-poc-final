@@ -1,80 +1,54 @@
-import React, { useState, useEffect } from "react";
-import {
-  Card,
-  Button,
-  Alert,
-  Spin,
-  Typography,
-  Empty,
-  Descriptions,
-} from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
-import {
-  leaveApi,
-  type CompletedProcess,
-  type CompletedTask,
-} from "../api/leaveApi";
+import React, { useState, useEffect } from 'react';
+import { Card, Button, Alert, Spin, Typography, Empty, Descriptions } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
+import type { CompletedProcess, CompletedTask } from '../api/leaveApi';
 
 const { Title } = Typography;
 
-export function Completed() {
-  const [processes, setProcesses] = useState<CompletedProcess[]>([]);
-  const [selectedProcess, setSelectedProcess] = useState<string | null>(null);
-  const [tasks, setTasks] = useState<CompletedTask[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [tasksLoading, setTasksLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+interface CompletedTasksProps {
+  processes: CompletedProcess[];
+  selectedProcess: string | null;
+  tasks: CompletedTask[];
+  loading: boolean;
+  tasksLoading: boolean;
+  error: string | null;
+  setSelectedProcess: (processId: string | null) => void;
+  loadCompletedProcesses: () => void;
+  loadCompletedTasks: (processInstanceId: string) => void;
+  formatDate: (dateString: string | Date) => string;
+  formatDuration: (millis: number) => string;
+}
 
-  const loadProcesses = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await leaveApi.getCompletedProcesses();
-      setProcesses(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "查询已结束流程失败");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadTasks = async (processInstanceId: string) => {
-    setTasksLoading(true);
-    try {
-      const data = await leaveApi.getCompletedTasks(processInstanceId);
-      setTasks(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "查询已完成任务失败");
-    } finally {
-      setTasksLoading(false);
-    }
-  };
-
+export const CompletedTasks: React.FC<CompletedTasksProps> = ({
+  processes,
+  selectedProcess,
+  tasks,
+  loading,
+  tasksLoading,
+  error,
+  setSelectedProcess,
+  loadCompletedProcesses,
+  loadCompletedTasks,
+  formatDate,
+  formatDuration
+}) => {
+  // 处理流程点击
   const handleProcessClick = (processInstanceId: string) => {
     setSelectedProcess(processInstanceId);
-    loadTasks(processInstanceId);
+    loadCompletedTasks(processInstanceId);
   };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString("zh-CN");
-  };
-
-  const formatDuration = (millis: number) => {
-    const hours = Math.floor(millis / (1000 * 60 * 60));
-    const minutes = Math.floor((millis % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}小时${minutes}分钟`;
-  };
-
-  useEffect(() => {
-    loadProcesses();
-  }, []);
 
   return (
-    <div className="process-instance-page">
-      <Title level={4} style={{ marginBottom: 16 }}>
-        已结束流程
-      </Title>
+    <>
+      <Button
+        type="primary"
+        icon={<ReloadOutlined />}
+        onClick={loadCompletedProcesses}
+        loading={loading}
+        style={{ marginBottom: 16 }}
+      >
+        刷新流程列表
+      </Button>
 
       {error && (
         <Alert
@@ -86,16 +60,6 @@ export function Completed() {
         />
       )}
 
-      <Button
-        type="primary"
-        icon={<ReloadOutlined />}
-        onClick={loadProcesses}
-        loading={loading}
-        style={{ marginBottom: 16 }}
-      >
-        刷新流程列表
-      </Button>
-
       <div style={{ display: "flex", gap: 16 }}>
         <div style={{ flex: 1 }}>
           <Card
@@ -106,7 +70,7 @@ export function Completed() {
               <Button
                 type="link"
                 icon={<ReloadOutlined />}
-                onClick={loadProcesses}
+                onClick={loadCompletedProcesses}
                 loading={loading}
               >
                 刷新
@@ -243,6 +207,6 @@ export function Completed() {
           </Card>
         </div>
       </div>
-    </div>
+    </>
   );
-}
+};

@@ -1,37 +1,98 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { StartProcess } from './pages/StartProcess';
-import { ApplyLeave } from './pages/ApplyLeave';
-import { Tasks } from './pages/Tasks';
-import { Completed } from './pages/Completed';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { Layout, Menu, theme } from "antd";
+import LeaveProcessDefinition from "./pages/LeaveProcessDefinition";
+import { UnfinishedTasks } from "./pages/UnfinishedTasks";
+import { ProcessManagement } from "./pages/ProcessManagement";
+import { StartProcess } from "./pages/StartProcess";
+// 导入页面包装组件
+import ProcessInstancesPage from "./pages/ProcessInstancesPage";
+import ApplicationHistoryPage from "./pages/ApplicationHistoryPage";
+import CompletedTasksPage from "./pages/CompletedTasksPage";
+import LeaveApplication from "./pages/LeaveApplication";
 
-function App() {
+const { Header, Content, Sider } = Layout;
+
+const App: React.FC = () => {
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
+
   return (
     <Router>
-      <div className="app">
-        <nav className="navbar">
-          <div className="nav-brand">
-            <h1>请假流程管理系统</h1>
-          </div>
-          <div className="nav-links">
-            <Link to="/" className="nav-link">启动流程</Link>
-            <Link to="/apply" className="nav-link">填写请假单</Link>
-            <Link to="/tasks" className="nav-link">审批任务</Link>
-            <Link to="/completed" className="nav-link">已结束流程</Link>
-          </div>
-        </nav>
-        
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<StartProcess />} />
-            <Route path="/apply" element={<ApplyLeave />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/completed" element={<Completed />} />
-          </Routes>
-        </main>
-      </div>
+      <Layout>
+        <Header className="flex items-center">
+          <div className="text-white text-xl font-bold">请假管理系统</div>
+        </Header>
+        <Layout>
+          <Sider width={200} className="bg-white">
+            <Menu
+              mode="inline"
+              defaultSelectedKeys={["1"]}
+              style={{ height: "100%", borderRight: 0 }}
+              items={[
+                { key: "1", label: <Link to="/">请假申请</Link> },
+                {
+                  key: "2",
+                  label: <Link to="/unfinished-tasks">审批任务</Link>,
+                },
+                {
+                  key: "3",
+                  label: <Link to="/process-management">流程管理</Link>,
+                },
+                {
+                  key: "3-1",
+                  label: <Link to="/process-instances">流程实例管理</Link>,
+                },
+                {
+                  key: "3-2",
+                  label: <Link to="/application-history">申请历史</Link>,
+                },
+                {
+                  key: "3-3",
+                  label: <Link to="/completed-tasks">已完成任务</Link>,
+                },
+                {
+                  key: "4",
+                  label: <Link to="/process-definition">流程定义</Link>,
+                },
+              ]}
+            />
+          </Sider>
+          <Layout className="p-6" style={{ background: colorBgContainer }}>
+            <Content>
+              <Routes>
+                <Route path="/" element={<LeaveApplication />} />
+                <Route path="/start" element={<StartProcess />} />
+                <Route path="/unfinished-tasks" element={<UnfinishedTasks />} />
+                <Route
+                  path="/process-definition"
+                  element={<LeaveProcessDefinition />}
+                />
+                <Route
+                  path="/process-management"
+                  element={<ProcessManagement />}
+                />
+                {/* 配置拆分后的三个页面的直接路由 */}
+                <Route
+                  path="/process-instances"
+                  element={<ProcessInstancesPage />}
+                />
+                <Route
+                  path="/application-history"
+                  element={<ApplicationHistoryPage />}
+                />
+                <Route
+                  path="/completed-tasks"
+                  element={<CompletedTasksPage />}
+                />
+              </Routes>
+            </Content>
+          </Layout>
+        </Layout>
+      </Layout>
     </Router>
   );
-}
+};
 
 export default App;
