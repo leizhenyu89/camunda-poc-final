@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.HistoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
+import org.camunda.bpm.engine.history.HistoricVariableInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -94,7 +95,8 @@ public class ProcessInstanceController {
             // 将已完成的流程实例转换为ProcessInstanceDto并添加到结果列表
             completedInstances.forEach(instance -> {
                 ProcessInstanceDto dto = mapHistoricProcessInstance(instance);
-                dto.setStatus("completed");
+                Boolean approved = (Boolean) getVariableValueForCompletedInstance(instance.getId(), "approved");
+                dto.setStatus(approved == Boolean.TRUE ? "completed" : "rejected");
                 result.add(dto);
             });
         }
@@ -122,6 +124,15 @@ public class ProcessInstanceController {
             // 忽略异常，尝试其他方法
         }
         return "";
+    }
+
+    public Object getVariableValueForCompletedInstance(String processInstanceId, String variableName) {
+        HistoricVariableInstance variable = historyService
+                .createHistoricVariableInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .variableName(variableName)
+                .singleResult();
+        return variable != null ? variable.getValue() : null;
     }
 
     /**

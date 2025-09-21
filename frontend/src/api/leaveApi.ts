@@ -36,6 +36,8 @@ export interface ExecutionPath {
   type: 'start' | 'task' | 'gateway' | 'end';
   isActive: boolean;
   variables?: Record<string, any>;
+  reason?: string;
+  approved?:string
 }
 export interface Task {
   id: string;

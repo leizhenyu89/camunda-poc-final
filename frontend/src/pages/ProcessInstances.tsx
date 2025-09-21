@@ -106,8 +106,14 @@ export const ProcessInstances: React.FC<ProcessInstancesProps> = ({
         if (record.suspended) {
           return <Tag color="error">已挂起</Tag>;
         }
+        // 检查流程变量中是否有拒绝标志
+        const hasRejection = record.status === 'rejected';
         return record.endTime ? (
-          <Tag color="success">已完成</Tag>
+          hasRejection ? (
+            <Tag color="error">已拒绝</Tag>
+          ) : (
+            <Tag color="success">已完成</Tag>
+          )
         ) : (
           <Tag color="processing">进行中</Tag>
         );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Tabs,
   Button,
@@ -34,9 +34,9 @@ import {
 import { processApi } from "../api/processApi";
 import type { ProcessInstance } from "../entity/ProcessDefinition";
 
-import { ProcessInstances } from './ProcessInstances';
-import { ApplicationHistory } from './ApplicationHistory';
-import { CompletedTasks } from './CompletedTasks';
+import { ProcessInstances } from "./ProcessInstances";
+import { ApplicationHistory } from "./ApplicationHistory";
+import { CompletedTasks } from "./CompletedTasks";
 
 const { Title } = Typography;
 
@@ -46,32 +46,39 @@ export const ProcessManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // 流程实例管理状态
-  const [processInstances, setProcessInstances] = useState<ProcessInstance[]>([]);
+  const [processInstances, setProcessInstances] = useState<ProcessInstance[]>(
+    []
+  );
   const [searchKey, setSearchKey] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [instancesPagination, setInstancesPagination] = useState<TablePaginationConfig>({
-    current: 1,
-    pageSize: 10,
-    showSizeChanger: true,
-    showTotal: (total, range) =>
-      `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
-  });
+  const [instancesPagination, setInstancesPagination] =
+    useState<TablePaginationConfig>({
+      current: 1,
+      pageSize: 10,
+      showSizeChanger: true,
+      showTotal: (total, range) =>
+        `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
+    });
 
   // 流程执行轨迹状态
   const [executionPaths, setExecutionPaths] = useState<ExecutionPath[]>([]);
   const [executionPathLoading, setExecutionPathLoading] = useState(false);
-  const [processDetailsModalVisible, setProcessDetailsModalVisible] = useState(false);
-  const [currentProcessInstance, setCurrentProcessInstance] = useState<ProcessInstance | null>(null);
+  const [processDetailsModalVisible, setProcessDetailsModalVisible] =
+    useState(false);
+  const [currentProcessInstance, setCurrentProcessInstance] =
+    useState<ProcessInstance | null>(null);
 
   // 我的申请历史状态 - 已移至ApplicationHistory组件，保留引用以便传递给子组件
   const [applications, setApplications] = useState<LeaveApplication[]>([]);
-  const [applicationStatusFilter, setApplicationStatusFilter] = useState<string>("all");
-  const [applicationsPagination, setApplicationsPagination] = useState<TablePaginationConfig>({
-    current: 1,
-    pageSize: 10,
-    showSizeChanger: true,
-    showTotal: (total, range) => `第${range[0]}-${range[1]}条，共${total}条`,
-  });
+  const [applicationStatusFilter, setApplicationStatusFilter] =
+    useState<string>("all");
+  const [applicationsPagination, setApplicationsPagination] =
+    useState<TablePaginationConfig>({
+      current: 1,
+      pageSize: 10,
+      showSizeChanger: true,
+      showTotal: (total, range) => `第${range[0]}-${range[1]}条，共${total}条`,
+    });
   const [userIdSearch, setUserIdSearch] = useState<string>("");
 
   // 以下函数已经移至子组件中，但保留引用以便传递给子组件
@@ -88,7 +95,9 @@ export const ProcessManagement: React.FC = () => {
   };
 
   // 已完成任务状态
-  const [completedProcesses, setCompletedProcesses] = useState<CompletedProcess[]>([]);
+  const [completedProcesses, setCompletedProcesses] = useState<
+    CompletedProcess[]
+  >([]);
   const [selectedProcess, setSelectedProcess] = useState<string | null>(null);
   const [completedTasks, setCompletedTasks] = useState<CompletedTask[]>([]);
   const [tasksLoading, setTasksLoading] = useState(false);
@@ -248,112 +257,6 @@ export const ProcessManagement: React.FC = () => {
     }
   };
 
-  // 流程实例表格列定义
-  const processInstanceColumns: ColumnsType<ProcessInstance> = [
-    {
-      title: "业务键",
-      dataIndex: "businessKey",
-      key: "businessKey",
-      ellipsis: true,
-      render: (businessKey) => businessKey || "无",
-    },
-    {
-      title: "流程实例ID",
-      dataIndex: "id",
-      key: "id",
-      ellipsis: true,
-    },
-    {
-      title: "申请人",
-      key: "employeeName",
-      render: (_, record) => {
-        try {
-          // 同时检查两种可能的字段名，确保兼容性
-          return (
-            record.variables?.employeeName ||
-            record.variables?.applicant ||
-            "未知"
-          );
-        } catch (error) {
-          console.error("获取申请人信息失败:", error);
-          return "未知";
-        }
-      },
-    },
-    {
-      title: "流程定义键",
-      dataIndex: "processDefinitionKey",
-      key: "processDefinitionKey",
-      ellipsis: true,
-    },
-    {
-      title: "开始时间",
-      key: "startTime",
-      render: (_, record) => {
-        try {
-          return record.startTime
-            ? new Date(record.startTime).toLocaleString("zh-CN")
-            : "未知";
-        } catch (error) {
-          return "未知";
-        }
-      },
-    },
-    {
-      title: "结束时间",
-      key: "endTime",
-      sortOrder: "descend",
-      render: (_, record) => {
-        try {
-          return record.endTime
-            ? new Date(record.endTime).toLocaleString("zh-CN")
-            : "未知";
-        } catch (error) {
-          return "未知";
-        }
-      },
-    },
-    {
-      title: "状态",
-      key: "status",
-      render: (_, record) => {
-        if (record.suspended) {
-          return <Tag color="error">已挂起</Tag>;
-        }
-        return record.endTime ? (
-          <Tag color="success">已完成</Tag>
-        ) : (
-          <Tag color="processing">进行中</Tag>
-        );
-      },
-    },
-    {
-      title: "操作",
-      key: "action",
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            type="link"
-            icon={<EyeOutlined />}
-            onClick={() => viewProcessInstance(record)}
-          >
-            查看
-          </Button>
-          {!record.endTime && (
-            <Button
-              type="link"
-              danger
-              icon={<StopOutlined />}
-              onClick={() => suspendProcessInstance(record)}
-            >
-              挂起
-            </Button>
-          )}
-        </Space>
-      ),
-    },
-  ];
-
   // 初始化加载数据
   useEffect(() => {
     loadCompletedProcesses();
@@ -468,10 +371,12 @@ export const ProcessManagement: React.FC = () => {
                   : "进行中"}
               </Descriptions.Item>
               <Descriptions.Item label="状态">
-                {currentProcessInstance.suspended ? (
-                  <Tag color="error">已挂起</Tag>
-                ) : currentProcessInstance.endTime ? (
-                  <Tag color="success">已完成</Tag>
+                {currentProcessInstance.endTime ? (
+                  currentProcessInstance.status === "rejected" ? (
+                    <Tag color="error">已拒绝</Tag>
+                  ) : (
+                    <Tag color="success">已完成</Tag>
+                  )
                 ) : (
                   <Tag color="processing">进行中</Tag>
                 )}
@@ -547,6 +452,7 @@ export const ProcessManagement: React.FC = () => {
                           <div>结束时间: {formatDate(path.endTime)}</div>
                         )}
                         {path.assignee && <div>处理人: {path.assignee}</div>}
+                        {path.reason && path.activityName === '部门经理审批' && <div> 原因: {path.reason}</div>}
                         {path.durationInMillis && (
                           <div>
                             处理时长: {formatDuration(path.durationInMillis)}

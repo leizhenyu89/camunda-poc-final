@@ -12,6 +12,7 @@ import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.history.HistoricActivityInstance;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
 import org.camunda.bpm.engine.history.HistoricTaskInstance;
+import org.camunda.bpm.engine.history.HistoricVariableInstance;
 import org.camunda.bpm.engine.runtime.Execution;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.task.Task;
@@ -280,7 +281,7 @@ public class LeaveController {
         // 处理历史活动实例，构建执行轨迹
         List<Map<String, Object>> executionPath = historicActivities.stream()
                 .map(activity -> {
-                    Map<String, Object> activityInfo = new HashMap<>();
+                    Map<String, Object> activityInfo = new HashMap<>(getHistoricVariablesByExecutionId(activity.getExecutionId()));
                     activityInfo.put("id", activity.getId());
                     activityInfo.put("activityId", activity.getActivityId());
                     activityInfo.put("activityName", activity.getActivityName());
@@ -400,6 +401,26 @@ public class LeaveController {
         });
 
         return ResponseEntity.ok(executionPath);
+    }
+
+
+    /**
+     * 2. 获取指定executionId的历史变量（包含已结束的流程，保留最新版本）
+     * 历史变量：包含变量的全生命周期记录，此处取最新状态
+     */
+    public Map<String, Object> getHistoricVariablesByExecutionId(String executionId) {
+        List<HistoricVariableInstance> variables = historyService
+                .createHistoricVariableInstanceQuery()
+                .executionIdIn(executionId)
+                .list();
+
+        // 转换为Map
+        return variables.stream()
+                .collect(Collectors.toMap(
+                        HistoricVariableInstance::getName,
+                        HistoricVariableInstance::getValue,
+                        (existing, replacement) -> replacement // 处理重复（理论上不会出现）
+                ));
     }
 }
 

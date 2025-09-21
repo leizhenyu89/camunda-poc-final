@@ -120,6 +120,8 @@ export interface ProcessInstance {
    * 可选的结束时间 - 有些返回数据可能没有
    */
   endTime?: Date | string;
+
+  status?: string;
 }
 
 // {
