@@ -41,18 +41,6 @@ const App: React.FC = () => {
                   label: <Link to="/process-management">流程管理</Link>,
                 },
                 {
-                  key: "3-1",
-                  label: <Link to="/process-instances">流程实例管理</Link>,
-                },
-                {
-                  key: "3-2",
-                  label: <Link to="/application-history">申请历史</Link>,
-                },
-                {
-                  key: "3-3",
-                  label: <Link to="/completed-tasks">已完成任务</Link>,
-                },
-                {
                   key: "4",
                   label: <Link to="/process-definition">流程定义</Link>,
                 },
@@ -72,19 +60,6 @@ const App: React.FC = () => {
                 <Route
                   path="/process-management"
                   element={<ProcessManagement />}
-                />
-                {/* 配置拆分后的三个页面的直接路由 */}
-                <Route
-                  path="/process-instances"
-                  element={<ProcessInstancesPage />}
-                />
-                <Route
-                  path="/application-history"
-                  element={<ApplicationHistoryPage />}
-                />
-                <Route
-                  path="/completed-tasks"
-                  element={<CompletedTasksPage />}
                 />
               </Routes>
             </Content>

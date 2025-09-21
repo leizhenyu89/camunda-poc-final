@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Tabs,
-  Table,
   Button,
-  Input,
   Select,
   Tag,
   Space,
@@ -18,8 +16,6 @@ import {
   Badge,
 } from "antd";
 import {
-  ReloadOutlined,
-  SearchOutlined,
   EyeOutlined,
   StopOutlined,
   ClockCircleOutlined,
@@ -43,7 +39,6 @@ import { ApplicationHistory } from './ApplicationHistory';
 import { CompletedTasks } from './CompletedTasks';
 
 const { Title } = Typography;
-const { Option } = Select;
 
 export const ProcessManagement: React.FC = () => {
   // 通用状态
@@ -51,45 +46,49 @@ export const ProcessManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // 流程实例管理状态
-  const [processInstances, setProcessInstances] = useState<ProcessInstance[]>(
-    []
-  );
+  const [processInstances, setProcessInstances] = useState<ProcessInstance[]>([]);
   const [searchKey, setSearchKey] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [instancesPagination, setInstancesPagination] =
-    useState<TablePaginationConfig>({
-      current: 1,
-      pageSize: 10,
-      showSizeChanger: true,
-      showTotal: (total, range) =>
-        `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
-    });
+  const [instancesPagination, setInstancesPagination] = useState<TablePaginationConfig>({
+    current: 1,
+    pageSize: 10,
+    showSizeChanger: true,
+    showTotal: (total, range) =>
+      `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
+  });
 
   // 流程执行轨迹状态
   const [executionPaths, setExecutionPaths] = useState<ExecutionPath[]>([]);
   const [executionPathLoading, setExecutionPathLoading] = useState(false);
-  const [processDetailsModalVisible, setProcessDetailsModalVisible] =
-    useState(false);
-  const [currentProcessInstance, setCurrentProcessInstance] =
-    useState<ProcessInstance | null>(null);
+  const [processDetailsModalVisible, setProcessDetailsModalVisible] = useState(false);
+  const [currentProcessInstance, setCurrentProcessInstance] = useState<ProcessInstance | null>(null);
 
-  // 我的申请历史状态
+  // 我的申请历史状态 - 已移至ApplicationHistory组件，保留引用以便传递给子组件
   const [applications, setApplications] = useState<LeaveApplication[]>([]);
-  const [applicationStatusFilter, setApplicationStatusFilter] =
-    useState<string>("all");
-  const [applicationsPagination, setApplicationsPagination] =
-    useState<TablePaginationConfig>({
-      current: 1,
-      pageSize: 10,
-      showSizeChanger: true,
-      showTotal: (total, range) => `第${range[0]}-${range[1]}条，共${total}条`,
-    });
-  const [userIdSearch, setUserIdSearch] = useState<string>(""); // 添加userId搜索状态
+  const [applicationStatusFilter, setApplicationStatusFilter] = useState<string>("all");
+  const [applicationsPagination, setApplicationsPagination] = useState<TablePaginationConfig>({
+    current: 1,
+    pageSize: 10,
+    showSizeChanger: true,
+    showTotal: (total, range) => `第${range[0]}-${range[1]}条，共${total}条`,
+  });
+  const [userIdSearch, setUserIdSearch] = useState<string>("");
+
+  // 以下函数已经移至子组件中，但保留引用以便传递给子组件
+  const loadLeaveApplications = async () => {
+    // 此函数已移至ApplicationHistory组件中
+    // 这里仅保留空实现以避免编译错误
+    console.warn("loadLeaveApplications函数已移至ApplicationHistory组件");
+  };
+
+  const viewApplication = (application: LeaveApplication) => {
+    // 此函数已移至ApplicationHistory组件中
+    // 这里仅保留空实现以避免编译错误
+    console.warn("viewApplication函数已移至ApplicationHistory组件");
+  };
 
   // 已完成任务状态
-  const [completedProcesses, setCompletedProcesses] = useState<
-    CompletedProcess[]
-  >([]);
+  const [completedProcesses, setCompletedProcesses] = useState<CompletedProcess[]>([]);
   const [selectedProcess, setSelectedProcess] = useState<string | null>(null);
   const [completedTasks, setCompletedTasks] = useState<CompletedTask[]>([]);
   const [tasksLoading, setTasksLoading] = useState(false);
@@ -166,107 +165,6 @@ export const ProcessManagement: React.FC = () => {
     }
   };
 
-  // 加载请假申请历史
-  const loadLeaveApplications = async () => {
-    setLoading(true);
-    try {
-      // 调用新的API获取用户的流程实例
-      // 使用搜索框中的userId，如果为空则使用当前用户ID
-      const searchUserId = userIdSearch || "currentUser"; // 实际应用中应该从认证系统获取当前用户ID
-
-      // 调用新添加的API接口
-      const processInstances = await leaveApi.getUserProcessInstances(
-        searchUserId,
-        {}
-      );
-
-      // 从API结果中构建请假申请列表
-      const allApplications: LeaveApplication[] = [];
-
-      // 处理所有流程实例
-      processInstances.forEach((process: any) => {
-        // 确定状态
-        let status: "pending" | "approved" | "rejected" | "cancelled" =
-          "pending";
-        if (process.endTime) {
-          // 已完成的流程
-          if (process.deleteReason && process.deleteReason.includes("拒绝")) {
-            status = "rejected";
-          } else if (
-            process.deleteReason &&
-            process.deleteReason.includes("取消")
-          ) {
-            status = "cancelled";
-          } else {
-            status = "approved";
-          }
-        }
-
-        // 从流程变量中获取更多信息
-        const variables = process.variables || {};
-        const leaveType = variables.leaveType || "年假";
-        const startDate = variables.startTime
-          ? new Date(variables.startTime).toISOString().split("T")[0]
-          : process.startTime
-          ? new Date(process.startTime).toISOString().split("T")[0]
-          : "";
-        const endDate = variables.endTime
-          ? new Date(variables.endTime).toISOString().split("T")[0]
-          : "";
-        const reason = variables.reason || "请假申请";
-
-        const application: LeaveApplication = {
-          id: `process-${process.id}`,
-          businessKey:
-            process.businessKey || `PROCESS-${process.id.substring(0, 8)}`,
-          leaveType: leaveType,
-          startDate: startDate,
-          endDate: endDate,
-          reason: reason,
-          status: status,
-          submitTime: process.startTime || new Date().toISOString(),
-          approver: process.approver || "系统",
-          approveTime: process.endTime || new Date().toISOString(),
-          comment:
-            status === "rejected"
-              ? "申请未通过"
-              : status === "cancelled"
-              ? "申请已取消"
-              : "申请已通过",
-        };
-        allApplications.push(application);
-      });
-
-      // 应用筛选条件
-      let filteredApplications = [...allApplications];
-
-      // 按状态筛选
-      if (applicationStatusFilter !== "all") {
-        filteredApplications = filteredApplications.filter(
-          (app) => app.status === applicationStatusFilter
-        );
-      }
-
-      // 按提交时间倒序排列
-      filteredApplications.sort(
-        (a, b) =>
-          new Date(b.submitTime).getTime() - new Date(a.submitTime).getTime()
-      );
-
-      setApplications(filteredApplications);
-      setApplicationsPagination((prev) => ({
-        ...prev,
-        total: filteredApplications.length,
-      }));
-      message.success("请假申请历史加载成功");
-    } catch (error) {
-      console.error("加载请假申请历史失败:", error);
-      message.error("加载请假申请历史失败");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // 加载已结束流程
   const loadCompletedProcesses = async () => {
     setLoading(true);
@@ -322,18 +220,6 @@ export const ProcessManagement: React.FC = () => {
     // 然后刷新列表
   };
 
-  // 查看请假申请详情
-  const viewApplication = (application: LeaveApplication) => {
-    console.log("查看请假申请:", application);
-    message.info("查看请假申请: " + application.businessKey);
-  };
-
-  // 处理流程点击
-  const handleProcessClick = (processInstanceId: string) => {
-    setSelectedProcess(processInstanceId);
-    loadCompletedTasks(processInstanceId);
-  };
-
   // 格式化日期
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString("zh-CN");
@@ -344,29 +230,6 @@ export const ProcessManagement: React.FC = () => {
     const hours = Math.floor(millis / (1000 * 60 * 60));
     const minutes = Math.floor((millis % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}小时${minutes}分钟`;
-  };
-
-  // 获取请假类型对应的中文名称
-  const getLeaveTypeName = (type: string): string => {
-    const typeMap: Record<string, string> = {
-      annual: "年假",
-      sick: "病假",
-      personal: "事假",
-      marriage: "婚假",
-      maternity: "产假/陪产假",
-    };
-    return typeMap[type] || type;
-  };
-
-  // 获取状态对应的中文名称和标签颜色
-  const getStatusInfo = (status: string) => {
-    const statusMap: Record<string, { text: string; color: string }> = {
-      pending: { text: "待审批", color: "processing" },
-      approved: { text: "已批准", color: "success" },
-      rejected: { text: "已拒绝", color: "error" },
-      cancelled: { text: "已取消", color: "default" },
-    };
-    return statusMap[status] || { text: status, color: "default" };
   };
 
   // 获取活动类型对应的图标
@@ -491,82 +354,11 @@ export const ProcessManagement: React.FC = () => {
     },
   ];
 
-  // 请假申请表格列定义
-  const applicationColumns: ColumnsType<LeaveApplication> = [
-    {
-      title: "申请单号",
-      dataIndex: "businessKey",
-      key: "businessKey",
-      ellipsis: true,
-    },
-    {
-      title: "请假类型",
-      dataIndex: "leaveType",
-      key: "leaveType",
-      render: (type) => getLeaveTypeName(type),
-    },
-    {
-      title: "请假时间",
-      key: "leaveTime",
-      render: (_, record) => `${record.startDate} 至 ${record.endDate}`,
-    },
-    {
-      title: "提交时间",
-      dataIndex: "submitTime",
-      key: "submitTime",
-      render: (time) => {
-        return new Date(time).toLocaleString("zh-CN");
-      },
-    },
-    {
-      title: "状态",
-      key: "status",
-      render: (_, record) => {
-        const statusInfo = getStatusInfo(record.status);
-        return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
-      },
-    },
-    {
-      title: "操作",
-      key: "action",
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            type="link"
-            icon={<EyeOutlined />}
-            onClick={() => viewApplication(record)}
-          >
-            查看
-          </Button>
-          {record.status === "pending" && (
-            <Button type="link" danger disabled>
-              取消
-            </Button>
-          )}
-        </Space>
-      ),
-    },
-  ];
-
   // 初始化加载数据
   useEffect(() => {
     loadCompletedProcesses();
     loadProcessInstances();
   }, []);
-
-  // 处理分页变化
-  const handleInstancesPaginationChange = (
-    pagination: TablePaginationConfig
-  ) => {
-    setInstancesPagination(pagination);
-    loadProcessInstances();
-  };
-
-  const handleApplicationsPaginationChange = (
-    pagination: TablePaginationConfig
-  ) => {
-    setApplicationsPagination(pagination);
-  };
 
   // 定义标签页项
   const tabItems = [
